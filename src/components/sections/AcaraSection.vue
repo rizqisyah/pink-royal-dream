@@ -46,12 +46,12 @@ const withZone = (t: string) => (t && !/\b(WIB|WITA|WIT)\b/i.test(t) ? `${t} WIB
  * at two — the band has two arches.
  */
 const cards = computed<Card[]>(() => {
-  const live = (acara.value as any[]).filter((a) => a?.name || a?.event_date)
+  const live = (acara.value as any[]).filter((a) => a?.title || a?.name || a?.event_date)
   if (!live.length) return [DESIGN_CARD, DESIGN_CARD]
   return live.slice(0, 2).map((a) => {
     const when = formatEventDateId(a.event_date)
     return {
-      title: a.name || '',
+      title: a.title || a.name || '',
       note: a.description || a.note || '',
       date: when ? `${when.weekday},\n${when.date}` : '',
       time: withZone(formatEventTime(a.event_time)),
