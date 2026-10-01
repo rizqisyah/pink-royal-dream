@@ -82,9 +82,9 @@ L = [
     # 36 countdown, 37 "And", 38-41 gift — live.
     (42, '2751:588', 'closing/parts/closing-backdrop.webp', -79, 15265, 762, 491,
      dict(maskBox=dict(src='closing/parts/mask-closing.svg', x=215.873, y=36.394, w=321.67, h=453.208))),
-    (43, '2745:284', 'video/parts/video-thumb.webp', 8, 10873, 584, 329,
-     dict(radius=23, crop=dict(w=102.08, h=331.16, l=-1.07, t=-79.75))),
-    # 44 "video prewed", 45 RSVP, 46 wishes, 47-49 thank-you copy — live.
+    # 43: 2745:284, the prewed still, and 44 its "video prewed" caption — dropped; the
+    #     player sits in that box from the start (PrewedVideoSection).
+    # 45 RSVP, 46 wishes, 47-49 thank-you copy — live.
     (50, '2747:381', REGENCY, -210, 88, 420, 420, dict(flipX=True)),
     (51, '2747:382', REGENCY, 386, 69, 420, 420, {}),
     (52, '2747:383', 'hero/parts/podium.webp', -49, 849, 694, 218, dict(fit='fill', filter=GLOW)),

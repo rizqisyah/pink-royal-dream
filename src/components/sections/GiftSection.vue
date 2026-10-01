@@ -12,7 +12,7 @@ import { BAND_HEIGHT, LAYERS } from '../../lib/bands/gift'
 import { assets } from '../../lib/bandAssets'
 
 const { el, shown } = useReveal(0.15)
-const { gift } = useWedding()
+const { gift, wedding } = useWedding()
 
 const copyIcon = assets['gift/parts/copy-icon.webp']
 
@@ -48,8 +48,14 @@ const cards = computed<Card[]>(() => {
     })
     .filter((c): c is Card => !!c)
   // Three slots, like the design; a fourth account would run into the RSVP band.
-  return live.length ? live.slice(0, 3) : DESIGN
+  if (live.length) return live.slice(0, 3)
+  // The design's accounts stand in only before any wedding is loaded — never under a
+  // real couple's name, where a guest would transfer to them.
+  return wedding.value ? [] : DESIGN
 })
+
+/* A wedding with no accounts and no address has no gift band at all. */
+const hasGift = computed(() => cards.value.length > 0)
 
 /* Cards stack from y 243, 24 apart: Figma's own 11523 / 11650 / 11777. */
 const FIRST = 243
@@ -87,7 +93,13 @@ async function copy(i: number, text: string) {
 </script>
 
 <template>
-  <section :ref="el" class="band gift" :class="{ 'is-in': shown }" aria-labelledby="gift-heading">
+  <section
+    v-if="hasGift"
+    :ref="el"
+    class="band gift"
+    :class="{ 'is-in': shown }"
+    aria-labelledby="gift-heading"
+  >
     <BandArt :layers="LAYERS" :shown="shown" />
 
     <!-- 2745:216 — Pinyon Script 98.27/91.474, #dda2a3. -->

@@ -9,19 +9,26 @@ import InviteBody from './components/invite/InviteBody.vue'
 import BottomNav from './components/sections/BottomNav.vue'
 
 /*
- * `?open=1` / `?preview=1` skip the loader and the cover and land on the invitation —
- * what the admin's preview frame wants, and the same switch the TemaPsrt theme reads.
+ * Two switches, deliberately different:
+ *   - `?open=1` lands straight on the invitation — no loader, no cover.
+ *   - `?preview=true` (the admin's "Mode Imajinasi" frame: admin-dashboard App.tsx
+ *     loads `/<theme_code>/<slug>?preview=true`) skips only the loader. The cover is
+ *     part of what is being previewed — its names and guest line are live data — so it
+ *     stays, and opening it works as it does for a guest. The loader would only add
+ *     3.8s to every reload of the frame.
  */
 const params = new URLSearchParams(window.location.search)
-const skipIntro =
-  params.get('open') === '1' || params.get('preview') === '1' || params.get('preview') === 'true'
+const openDirect = params.get('open') === '1'
+const isPreview = params.get('preview') === '1' || params.get('preview') === 'true'
 
-const isOpen = ref(skipIntro)
-const isLocked = ref(!skipIntro)
-const contentVisible = ref(skipIntro)
-const showPreloader = ref(!skipIntro)
+const isOpen = ref(openDirect)
+const isLocked = ref(!openDirect)
+const contentVisible = ref(openDirect)
+const showPreloader = ref(!openDirect && !isPreview)
 // The cover holds its entrance until the loader lifts, so it plays where it can be seen.
+// With no loader it waits only for its own sprites.
 const coverActive = ref(false)
+const coverReady = computed(() => coverActive.value || (isPreview && coverLoaded.value))
 const { coupleNickname, quoteText, quoteVerse, leftCoverBg, guestName } = useWedding()
 const { coverLoaded, preloadCover, preloadInviteBody } = usePreloadAssets()
 
@@ -94,7 +101,7 @@ const leftBackgroundStyle = computed(() => {
           v-if="!isOpen"
           :guest-name="guestName"
           :couple-name="coupleNickname"
-          :ready="coverActive"
+          :ready="coverReady"
           @open="openInvitation"
         />
       </Transition>

@@ -4,7 +4,11 @@
 // Everything below the heading is live: two inputs, a Send button, and the list. The
 // design shows three wishes and a "Show more" pill; the list keeps that window — a
 // fixed-height panel that scrolls — so a long list never moves the bands below it.
-import { computed, ref, watch } from 'vue'
+//
+// More wishes arrive two ways, both on: scrolling the panel near its end loads the next
+// page by itself (the base theme's infinite scroll), and the design's "Show more" pill
+// does the same on a tap and scrolls the panel to the first new wish.
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import BandArt from '../invite/BandArt.vue'
 import { useReveal } from '../../composables/useReveal'
 import { useWedding } from '../../composables/useWedding'
@@ -35,6 +39,77 @@ const PAGE = 3
 const visible = ref(PAGE)
 const shownList = computed(() => list.value.slice(0, visible.value))
 const hasMore = computed(() => visible.value < list.value.length)
+
+const listEl = ref<HTMLElement | null>(null)
+
+/* How close to the panel's end (design px of slack) counts as "reached the end". */
+const NEAR_END = 40
+
+function loadMore() {
+  if (hasMore.value) visible.value += PAGE
+}
+
+/*
+ * A panel that does not overflow cannot be scrolled, so scrolling could never ask for
+ * more: short wishes that leave the window part-empty are topped up until it is full
+ * (or the list runs out). Design-length wishes already overflow at three, so this loads
+ * nothing extra there and the "Show more" pill keeps its job.
+ */
+async function fill() {
+  await nextTick()
+  const panel = listEl.value
+  // No box yet: the sheet sits behind the cover under `v-show`, where every height reads
+  // 0 and the panel would look empty forever. The ResizeObserver below refills on open.
+  if (!panel || !panel.clientHeight) return
+  while (hasMore.value && panel.scrollHeight <= panel.clientHeight + 1) {
+    loadMore()
+    await nextTick()
+  }
+}
+
+/*
+ * Infinite scroll, as the base's WishSection: reaching the end of the panel loads the
+ * next page. Held off while "Show more" scrolls the panel itself, or one tap would load
+ * two pages.
+ */
+let programmatic = false
+function onScroll() {
+  const panel = listEl.value
+  if (!panel || programmatic) return
+  if (panel.scrollTop + panel.clientHeight >= panel.scrollHeight - NEAR_END) loadMore()
+}
+
+/* "Show more": the next page, then the panel scrolls to the first of the new wishes. */
+async function showMore() {
+  if (!hasMore.value) return
+  const first = visible.value
+  loadMore()
+  await nextTick()
+  const panel = listEl.value
+  const card = panel?.children[first] as HTMLElement | undefined
+  if (!panel || !card) return
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  programmatic = true
+  window.setTimeout(() => (programmatic = false), reduce ? 50 : 700)
+  // The panel only — scrollIntoView would also move the page.
+  panel.scrollTo({ top: card.offsetTop, behavior: reduce ? 'auto' : 'smooth' })
+}
+
+watch(list, fill)
+// Fires when the panel first gets its size (the cover opening) and whenever it changes.
+let resize: ResizeObserver | null = null
+onMounted(() => {
+  const panel = listEl.value
+  if (!panel) return
+  panel.addEventListener('scroll', onScroll, { passive: true })
+  resize = new ResizeObserver(() => fill())
+  resize.observe(panel)
+  fill()
+})
+onBeforeUnmount(() => {
+  listEl.value?.removeEventListener('scroll', onScroll)
+  resize?.disconnect()
+})
 
 const name = ref('')
 watch(
@@ -104,7 +179,7 @@ const timeOf = (w: Wish) => w.time || formatWishTime(w.created_at)
     </form>
 
     <!-- 2745:315… — name, time, message, three to a window, 191.3 apart. -->
-    <ul class="wish__list">
+    <ul ref="listEl" class="wish__list">
       <li v-for="(w, i) in shownList" :key="i" class="wish__card">
         <p class="wish__who">{{ w.guest_name || 'Tamu' }}</p>
         <p v-if="timeOf(w)" class="wish__time">{{ timeOf(w) }}</p>
@@ -117,7 +192,7 @@ const timeOf = (w: Wish) => w.time || formatWishTime(w.created_at)
       type="button"
       class="wish__btn wish__more"
       :aria-disabled="!hasMore"
-      @click="hasMore && (visible += PAGE)"
+      @click="showMore"
     >
       Show more
     </button>

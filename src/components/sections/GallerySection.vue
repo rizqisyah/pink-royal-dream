@@ -11,7 +11,7 @@ import { BAND_HEIGHT, LAYERS } from '../../lib/bands/gallery'
 import { assets } from '../../lib/bandAssets'
 
 const { el, shown } = useReveal(0.15)
-const { gallery } = useWedding()
+const { gallery, wedding } = useWedding()
 
 const navCircle = assets['gallery/parts/nav-circle.svg']
 const navArrow = assets['gallery/parts/nav-arrow.svg']
@@ -27,8 +27,13 @@ const photos = computed(() => {
   const live = (gallery.value as any[])
     .map((g) => ({ src: g.image_url as string, caption: (g.caption as string) || '', design: false }))
     .filter((p) => p.src)
-  return live.length ? live : DESIGN_PHOTOS
+  if (live.length) return live
+  // The design's photo stands in only before any wedding is loaded; a real wedding with
+  // no photos has no gallery band at all.
+  return wedding.value ? [] : DESIGN_PHOTOS
 })
+
+const hasGallery = computed(() => photos.value.length > 0)
 
 const active = ref(0)
 watch(photos, () => (active.value = 0))
@@ -38,11 +43,22 @@ const step = (d: number) => {
   if (n) active.value = (active.value + d + n) % n
 }
 
-// Four thumbnail slots; a longer gallery pages through them four at a time.
-const THUMBS = 4
-const thumbs = computed(() => {
-  const start = Math.floor(active.value / THUMBS) * THUMBS
-  return photos.value.slice(start, start + THUMBS).map((p, i) => ({ ...p, index: start + i }))
+/*
+ * The thumbnail row holds every photo and scrolls sideways — swipe on a phone, wheel or
+ * trackpad on desktop. Four fit the design's 522px row; the rest are a swipe away, and
+ * the active one is always brought into view as the main photo changes.
+ */
+const strip = ref<HTMLElement | null>(null)
+watch(active, (i) => {
+  const row = strip.value
+  const thumb = row?.children[i] as HTMLElement | undefined
+  if (!row || !thumb) return
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  // Scroll the row only — scrollIntoView would also yank the page vertically.
+  row.scrollTo({
+    left: thumb.offsetLeft - (row.clientWidth - thumb.offsetWidth) / 2,
+    behavior: reduce ? 'auto' : 'smooth',
+  })
 })
 
 let autoplayTimer: number | null = null
@@ -105,7 +121,13 @@ const dlg = ref<HTMLDialogElement | null>(null)
 </script>
 
 <template>
-  <section :ref="el" class="band gallery" :class="{ 'is-in': shown }" aria-labelledby="gallery-heading">
+  <section
+    v-if="hasGallery"
+    :ref="el"
+    class="band gallery"
+    :class="{ 'is-in': shown }"
+    aria-labelledby="gallery-heading"
+  >
     <BandArt :layers="LAYERS" :shown="shown" />
 
     <!-- 2750:541 — 526.271 x 514.831, radius 22.881. -->
@@ -129,20 +151,20 @@ const dlg = ref<HTMLDialogElement | null>(null)
       </Transition>
     </button>
 
-    <!-- 2750:542 — four 122.329 x 129.28 thumbs, 11.121 apart, radius 27.802. -->
-    <div class="gallery__thumbs" role="tablist" aria-label="Foto">
+    <!-- 2750:542 — 122.329 x 129.28 thumbs, 11.121 apart, radius 27.802; scrolls sideways. -->
+    <div ref="strip" class="gallery__thumbs" role="tablist" aria-label="Foto">
       <button
-        v-for="t in thumbs"
-        :key="t.index"
+        v-for="(t, i) in photos"
+        :key="i"
         type="button"
         role="tab"
         class="gallery__thumb"
-        :class="{ 'is-active': t.index === active }"
-        :aria-selected="t.index === active"
-        :aria-label="`Foto ${t.index + 1}`"
-        @click="pick(t.index)"
+        :class="{ 'is-active': i === active }"
+        :aria-selected="i === active"
+        :aria-label="`Foto ${i + 1}`"
+        @click="pick(i)"
       >
-        <img :src="t.src" alt="" loading="lazy" decoding="async" />
+        <img :src="t.src" alt="" loading="lazy" decoding="async" draggable="false" />
       </button>
     </div>
 
@@ -160,7 +182,7 @@ const dlg = ref<HTMLDialogElement | null>(null)
     </button>
   </section>
 
-  <Teleport to="body">
+  <Teleport v-if="hasGallery" to="body">
     <dialog ref="dlg" class="preview" @close="startAutoplay" @click.self="dlg?.close()">
       <img
         class="preview__img"
@@ -235,18 +257,45 @@ const dlg = ref<HTMLDialogElement | null>(null)
   opacity: 0;
 }
 
+/*
+ * The design's 522.68 row, scrolling sideways when there are more than four photos.
+ * The 4px of padding above is room for a thumb's hover lift, which the horizontal
+ * overflow would otherwise clip; `top` gives it back so the thumbs sit on Figma's y.
+ */
 .gallery__thumbs {
   --delay: 320ms;
   z-index: 91;
   display: flex;
   gap: calc(11.121 * var(--px));
   left: calc(38.29 * var(--px));
-  top: calc(735.72 * var(--px));
+  top: calc((735.72 - 4) * var(--px));
   width: calc(522.68 * var(--px));
+  padding-top: calc(4 * var(--px));
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.gallery__thumbs::-webkit-scrollbar {
+  display: none;
+}
+
+/* Fewer than four: centred in the row, as the design's four are. Auto margins rather
+   than `justify-content: center`, which would cut off the start of an overflowing row. */
+.gallery__thumb:first-child {
+  margin-left: auto;
+}
+
+.gallery__thumb:last-child {
+  margin-right: auto;
 }
 
 .gallery__thumb {
   flex: none;
+  scroll-snap-align: start;
   width: calc(122.329 * var(--px));
   height: calc(129.28 * var(--px));
   padding: 0;

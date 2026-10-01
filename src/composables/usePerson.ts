@@ -39,12 +39,25 @@ export function usePerson(slot: 0 | 1) {
   // Live data never borrows the design's people: a blank field stays blank.
   const live = computed(() => !!wedding.value)
 
-  const fullName = computed(() => person.value?.name?.trim() || (live.value ? '' : design.value.fullName))
+  /*
+   * The wedding row can arrive without its people: the admin's Mode Imajinasi posts the
+   * wedding itself, and `pengantin` only comes with a getHome that may have failed. Its
+   * title ("Mario & Amanda", in display order) still names this slot's person, so the
+   * names never go blank — the same fallback `coupleNickname` uses.
+   */
+  const fromTitle = computed(() => {
+    const parts = String(wedding.value?.title || '').split('&').map((s) => s.trim())
+    return parts.length === 2 ? parts[slot] : ''
+  })
+
+  const fullName = computed(
+    () => person.value?.name?.trim() || (live.value ? fromTitle.value : design.value.fullName),
+  )
 
   const nickname = computed(() => {
     if (person.value?.nickname?.trim()) return person.value.nickname.trim()
     if (person.value?.name?.trim()) return person.value.name.trim().split(' ')[0]
-    return live.value ? '' : design.value.nickname
+    return live.value ? fromTitle.value : design.value.nickname
   })
 
   const parents = computed(() => parentLine(person.value) || (live.value ? '' : design.value.parents))

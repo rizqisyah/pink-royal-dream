@@ -21,13 +21,39 @@ const {
 // 2751:580 — the couple inside the pink mirror; the API's photo takes its place.
 const MIRROR = '2751:580'
 
-const layers = computed(() => {
-  const photo = customSpousePhoto.value || customHeroPhoto.value
-  if (!photo) return LAYERS
-  const t = spousePhotoTransform.value
-  return LAYERS.map((l) =>
-    l.id === MIRROR ? { ...l, src: photo, objectPosition: `${t.x ?? 50}% ${t.y ?? 50}%` } : l,
-  )
+/*
+ * Spouse Image (admin: "Foto Pasangan Prewedding"), falling back as the admin's own
+ * preview does — to the cover image — with the hero photo in between.
+ */
+const spousePhoto = computed(
+  () =>
+    (customSpousePhoto.value as string) ||
+    (customHeroPhoto.value as string) ||
+    ((wedding.value?.image_cover as string) ?? ''),
+)
+
+const layers = computed(() => (spousePhoto.value ? LAYERS.filter((l) => l.id !== MIRROR) : LAYERS))
+
+/*
+ * "Pengaturan Zoom & Posisi Spouse Image" — `theme_override.spouse_photo_transform`
+ * { scale, x, y }, applied exactly as the admin's live preview frame applies it:
+ * cover-fit, positioned at x% y%, scaled about that same point. The frame here is the
+ * mirror's own oval aperture (Ellipse 55, 322 x 430), not the 480 square the design's
+ * illustration was drawn in, so x/y mean what they mean in the admin.
+ */
+const num = (v: unknown, fallback: number) => {
+  const n = typeof v === 'number' ? v : parseFloat(String(v))
+  return Number.isFinite(n) ? n : fallback
+}
+const photoStyle = computed(() => {
+  const t = (spousePhotoTransform.value || {}) as Record<string, unknown>
+  const x = num(t.x, 50)
+  const y = num(t.y, 50)
+  return {
+    objectPosition: `${x}% ${y}%`,
+    transformOrigin: `${x}% ${y}%`,
+    transform: `scale(${num(t.scale, 1)})`,
+  }
 })
 
 /*
@@ -45,6 +71,11 @@ const fitMessage = useFitText()
 <template>
   <section :ref="el" class="band closing" :class="{ 'is-in': shown }" aria-labelledby="thanks">
     <BandArt :layers="layers" :shown="shown" />
+
+    <!-- Ellipse 55 (2751:593) — the mirror's aperture, holding the couple's own photo. -->
+    <div v-if="spousePhoto" class="closing__photo">
+      <img :src="spousePhoto" alt="Foto pasangan" loading="lazy" decoding="async" :style="photoStyle" />
+    </div>
 
     <!-- 2745:345 — Pinyon Script 93.746/100.567, #4e4e4e. -->
     <h2 id="thanks" class="closing__thanks">Thank You</h2>
@@ -65,6 +96,34 @@ const fitMessage = useFitText()
 <style scoped>
 .closing {
   height: calc(v-bind(BAND_HEIGHT) * var(--px));
+}
+
+/*
+ * z 53 — the illustration's own slot: over the palace backdrop, under the pink mirror
+ * frame (2751:576, z 98) whose carved rim overlaps the oval's edge.
+ */
+.closing__photo {
+  --delay: 200ms;
+  z-index: 53;
+  left: calc(141 * var(--px));
+  top: calc(1133 * var(--px));
+  width: calc(322 * var(--px));
+  height: calc(430 * var(--px));
+  border-radius: 50%;
+  overflow: hidden;
+  /* Keeps the rounded clip on the scaled photo in Safari. */
+  isolation: isolate;
+}
+
+.closing__photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: cover;
+  transition:
+    transform 0.3s ease,
+    object-position 0.3s ease;
 }
 
 .closing__thanks {

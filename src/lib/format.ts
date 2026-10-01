@@ -155,7 +155,12 @@ export function parentLine(p?: {
     prefix = `${isPria ? 'Putra' : 'Putri'} ${p.child_order.trim()} dari`
   }
   const father = (p.father_name || '').trim()
-  const mother = (p.mother_name || '').trim()
+  /*
+   * Admins often type the joiner into the field itself ("& Ibu Sofie" on demo-envelop),
+   * and the line below adds its own — which printed "Bapak Heri & & Ibu Sofie". Drop a
+   * leading "&" / "dan" so the joiner appears exactly once.
+   */
+  const mother = (p.mother_name || '').trim().replace(/^(&|dan\b)\s*/i, '')
   let parents = ''
   if (father && mother) {
     parents = father.includes('&') || father.includes('dan') ? `${father} ${mother}` : `${father}\n& ${mother}`
