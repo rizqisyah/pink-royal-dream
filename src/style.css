@@ -1,0 +1,252 @@
+/* The preloader's caption, as in the TemaPsrt loader it follows. */
+@import "@fontsource/inter/500.css";
+/* Frame 264 (cover). */
+@import "@fontsource/lisu-bosa/400-italic.css";
+/* Frame 263 (invitation body). */
+@import "@fontsource/pinyon-script/400.css";
+@import "@fontsource/cormorant-infant/400.css";
+@import "@fontsource/ibarra-real-nova/400.css";
+@import "@fontsource/ibarra-real-nova/400-italic.css";
+@import "@fontsource/ibarra-real-nova/600.css";
+@import "@fontsource/ibarra-real-nova/700.css";
+@import "@fontsource/rosarivo/400.css";
+@import "@fontsource/ropa-sans/400.css";
+@import "@fontsource/miss-fajardose/400.css";
+@import "@fontsource/eb-garamond/400.css";
+@import "@fontsource/bellefair/400.css";
+@import "@fontsource/abhaya-libre/800.css";
+@import "@fontsource/montaga/400.css";
+/* Free stand-ins for the design's commercial faces — see tokens.css. */
+@import "@fontsource/forum/400.css";
+@import "@fontsource/unifrakturmaguntia/400.css";
+/* The Instagram glyph on the name pills is Font Awesome Brands in the design. */
+@import "@fortawesome/fontawesome-free/css/fontawesome.min.css";
+@import "@fortawesome/fontawesome-free/css/brands.min.css";
+@import "./style/tokens.css";
+
+/*
+ * The design's six commercial faces, self-hosted rather than CDN so they survive the
+ * CSP and work offline. Each ships as the file the foundry distributes. The family
+ * names here are the ones tokens.css asks for first, so each replaced its free
+ * stand-in with no other change.
+ *
+ * LICENSE — shipping this theme commercially needs the paid families:
+ *   - Norveil Fantasy: DEMO cut, personal use only.
+ *   - Wonderia (7NTypes): free for personal use; commercial licence at 7ntypes.com.
+ *   - Calligraphy Script (Craft Supply Co): DEMO cut, personal use only, and missing
+ *     some Unicode glyphs; full version + licence on Creative Fabrica.
+ *   - Cloister Black: the download carried no licence file — confirm before selling.
+ * Swapping any of them is one url() here.
+ */
+@font-face {
+  font-family: "Bickham Script Pro";
+  src: url("./assets/fonts/bickham-script-pro.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Barley Sign";
+  src: url("./assets/fonts/barley-sign.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Norveil Fantasy Demo";
+  src: url("./assets/fonts/norveil-fantasy-demo.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Wonderia";
+  src: url("./assets/fonts/wonderia-demo.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/*
+ * The DEMO cut lacks some Unicode glyphs; a live closing message using one falls back
+ * per character to Pinyon Script (tokens.css), which is the nearest free face.
+ */
+@font-face {
+  font-family: "Calligraphy Script";
+  src: url("./assets/fonts/calligraphy-script-demo.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Figma names the style "Light"; the family ships one weight, and that is it. */
+@font-face {
+  font-family: "Cloister Black";
+  src: url("./assets/fonts/cloister-black.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/*
+ * Every band of Frame 263 is the same shape: sliced art from BandArt.vue, and live copy
+ * positioned over it in design px. These rules are global rather than repeated in each
+ * band's scoped block — a section's own stylesheet then carries nothing but its nodes'
+ * coordinates, which is the only part that differs.
+ *
+ * `> *:not(.band-art)` rather than a class per node: BandArt's sprites are the only
+ * children a band does not place itself, and they set their own z inline.
+ */
+.band {
+  position: relative;
+}
+
+.band > *:not(.band-art) {
+  /* Above every sliced layer by default; a node the design paints under art sets its own. */
+  z-index: 900;
+  position: absolute;
+  margin: 0;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(calc(24 * var(--px)));
+  transition:
+    opacity 1200ms cubic-bezier(0.16, 1, 0.3, 1) var(--delay, 0ms),
+    transform 1600ms cubic-bezier(0.16, 1, 0.28, 1) var(--delay, 0ms);
+}
+
+.band.is-in > *:not(.band-art) {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .band > *:not(.band-art) {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  width: 100%;
+  min-height: 100%;
+  overflow-x: hidden;
+}
+
+/* While the cover owns the screen nothing scrolls — see App.vue's `isLocked`. */
+html.is-cover-locked,
+html.is-cover-locked body {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+body {
+  background: var(--paper);
+  font-family: system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* The RSVP and wish forms' confirmation, shared so both read the same. */
+.success-popup {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  padding: 24px;
+}
+.success-popup__box {
+  background: #fff;
+  border-radius: 12px;
+  padding: 32px 24px;
+  text-align: center;
+  width: 100%;
+  max-width: 320px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.success-popup__icon {
+  width: 48px;
+  height: 48px;
+  color: var(--title);
+  margin: 0 auto 16px;
+}
+.success-popup__title {
+  font-family: var(--font-heading);
+  font-size: 34px;
+  color: var(--gift-ink);
+  margin: 0 0 8px;
+}
+.success-popup__text {
+  font-family: var(--font-field);
+  font-size: 16px;
+  color: #444;
+  margin: 0 0 24px;
+  line-height: 1.5;
+}
+.success-popup__close {
+  background: var(--button);
+  color: var(--button-ink);
+  border: none;
+  padding: 10px 24px;
+  border-radius: 999px;
+  font-family: var(--font-field);
+  font-size: 16px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.success-popup__close:hover {
+  opacity: 0.85;
+}
+
+@keyframes popIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}

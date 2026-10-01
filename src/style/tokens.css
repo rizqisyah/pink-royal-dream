@@ -1,0 +1,73 @@
+:root {
+  /*
+   * Theme hooks — useWedding() overwrites these from the API's theme_config
+   * (colors.primary / secondary / accent / bg_body). Seeded with Frame 263's own fills.
+   */
+  --maroon-title: #dda2a3; /* every pink script heading */
+  --maroon-text: #b78081; /* cover copy */
+  --gold: #c18182; /* the countdown */
+  --bg-body: #f9f0e9;
+
+  /* colours — sampled from Frames 264 and 263's own fills */
+  --title: var(--maroon-title);
+  --cover-bg: #fff6f2; /* Frame 264: rgba(255,240,235,.71) over white */
+  --parent-ink: #62401c; /* "Anak Pertama dari ..." */
+  --pill-ink: #f7f6f1; /* the Instagram pill's text */
+  --rosewood: #ac5b5b; /* event details */
+  --wine: #710000; /* venue and addresses */
+  --hot-pink: #ed8cae; /* "Resepsi" */
+  --quote-red: #c04935; /* QS Ar-Rum */
+  --gift-ink: #b16a6b;
+  --gift-tab: #e4b7b2;
+  --ink: #514f4f; /* wishes */
+  --ink-dark: #3f3b3a; /* RSVP intro */
+  --field-line: #67764d; /* form outlines */
+  --button: #efc7cb;
+  --button-ink: #603e24;
+  --charcoal: #4e4e4e; /* "Thank You" */
+  --grey-text: #9d9191; /* closing paragraph */
+  --footer-bar: #ffd1d4;
+  --footer-ink: #935021;
+  /* The ground for <body>, the desktop column and the cover box. */
+  --paper: #f9f0e9;
+
+  /*
+   * fonts — Google faces are self-hosted from @fontsource (see style.css). Six of the
+   * design's faces are commercial cuts with no webfont: each token keeps the real name
+   * first, so dropping its @font-face into style.css swaps it in, and falls back to the
+   * closest free face until then.
+   */
+  --font-script: "Pinyon Script", cursive; /* every pink script heading, the names */
+  --font-display: "Pinyon Script", cursive; /* desktop left column */
+  --font-cover: "Lisu Bosa", Georgia, serif; /* cover "kepada Yth." */
+  --font-serif: "Ibarra Real Nova", Georgia, serif;
+  --font-sans: "Bellefair", Georgia, serif; /* UI labels */
+  --font-heading: "Pinyon Script", cursive; /* popups */
+  --font-caps: "Wonderia", "Forum", serif; /* full names */
+  --font-parent: "Cormorant Infant", Georgia, serif;
+  --font-detail: "Ibarra Real Nova", Georgia, serif; /* events, countdown */
+  --font-bank: "Rosarivo", Georgia, serif;
+  --font-figures: "Ropa Sans", Arial, sans-serif; /* account numbers */
+  --font-video: "Miss Fajardose", cursive;
+  --font-body: "EB Garamond", Georgia, serif; /* RSVP intro */
+  --font-field: "Bellefair", Georgia, serif; /* form fields, wishes */
+  --font-card: "Abhaya Libre", Georgia, serif; /* wish names */
+  --font-verse: "Montaga", Georgia, serif; /* the QS Ar-Rum translation */
+  --font-verse-ref: "Norveil Fantasy Demo", "UnifrakturMaguntia", serif;
+  --font-and: "Bickham Script Pro", "Pinyon Script", cursive;
+  --font-closing: "Calligraphy Script", "Pinyon Script", cursive;
+  /*
+   * Substitute compensation for the closing message. 1: the real Calligraphy Script is
+   * installed and runs at Figma's own 24. It was 1.3 while Pinyon Script stood in —
+   * raise it again only if the real face is ever removed.
+   */
+  --closing-comp: 1;
+  --font-hashtag: "Barley Sign", "Pinyon Script", cursive;
+  --font-credit: "Cloister Black", "UnifrakturMaguntia", serif;
+
+  /* design frame reference (Figma Frame 264 cover / Frame 263 body) */
+  --frame-w: 596;
+  --frame-h: 1183;
+  --body-h: 16075;
+  --card-max: 430px;
+}
