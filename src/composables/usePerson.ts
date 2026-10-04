@@ -31,7 +31,8 @@ function handleOf(raw?: string | null): string {
 }
 
 export function usePerson(slot: 0 | 1) {
-  const { groom, bride, isGroomFirst, wedding, parsedOverride } = useWedding()
+  const { groom, bride, isGroomFirst, wedding, parsedOverride, groomTransform, brideTransform } =
+    useWedding()
 
   const isGroom = computed(() => (slot === 0) === isGroomFirst.value)
   const person = computed(() => (isGroom.value ? groom.value : bride.value))
@@ -76,5 +77,11 @@ export function usePerson(slot: 0 | 1) {
     return (custom as string) || ''
   })
 
-  return { isGroom, fullName, nickname, parents, instagram, photo }
+  /*
+   * Admin "Pengaturan Zoom & Posisi Foto Mempelai (Dinamis)". It follows the PERSON shown
+   * in this slot, not the slot: reorder the couple and each keeps their own framing.
+   */
+  const zoom = computed(() => (isGroom.value ? groomTransform.value : brideTransform.value))
+
+  return { isGroom, fullName, nickname, parents, instagram, photo, zoom }
 }

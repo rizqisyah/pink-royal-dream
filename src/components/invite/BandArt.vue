@@ -24,7 +24,10 @@ const K = FRAME_W / 375
 
 /** A layer that needs a box: anything the base would have pre-rotated into its export. */
 const isBoxed = (l: BandLayer) =>
-  !!(l.rotate || l.flipX || l.flipY || l.crop || l.stack || l.maskBox || l.iw || l.ih || l.radius || l.filter)
+  !!(
+    l.rotate || l.flipX || l.flipY || l.crop || l.stack || l.maskBox ||
+    l.iw || l.ih || l.radius || l.filter || l.zoom
+  )
 
 const px = (v: number) => `calc(${v} * var(--px))`
 
@@ -78,7 +81,8 @@ const spriteStyle = (l: BandLayer): Record<string, string> => {
     width: px(l.iw ?? l.w),
     height: px(l.ih ?? l.h),
     ...(t.length ? { transform: t.join(' ') } : {}),
-    ...(l.crop || l.radius ? { overflow: 'hidden' } : {}),
+    // A zoomed photo is scaled past its box; the box is what clips it.
+    ...(l.crop || l.radius || l.zoom ? { overflow: 'hidden' } : {}),
     ...(l.radius ? { borderRadius: px(l.radius) } : {}),
     ...(l.filter ? { filter: l.filter } : {}),
     ...(m
@@ -96,10 +100,23 @@ const spriteStyle = (l: BandLayer): Record<string, string> => {
   }
 }
 
-const cropStyle = (l: BandLayer): Record<string, string> | undefined =>
-  l.crop
+/*
+ * The sprite image itself: the design's crop, or — for an admin-zoomed photo — envelope-
+ * red's zoom: cover-fit, focused at x% y%, scaled about that same point.
+ */
+const imgStyle = (l: BandLayer): Record<string, string> | undefined => {
+  if (l.zoom) {
+    const { scale, x, y } = l.zoom
+    return {
+      objectPosition: `${x}% ${y}%`,
+      transformOrigin: `${x}% ${y}%`,
+      transform: `scale(${scale})`,
+    }
+  }
+  return l.crop
     ? { width: `${l.crop.w}%`, height: `${l.crop.h}%`, left: `${l.crop.l}%`, top: `${l.crop.t}%` }
     : undefined
+}
 
 const entrance = (l: BandLayer, i: number) => {
   const isBackdrop = l.w >= FRAME_W * 0.9 && l.h > 200 * K
@@ -167,7 +184,7 @@ const stagger = () => Math.min(props.step, MAX_STAGGER / Math.max(1, visible().l
           alt=""
           loading="lazy"
           decoding="async"
-          :style="cropStyle(layer)"
+          :style="imgStyle(layer)"
         />
       </div>
     </div>

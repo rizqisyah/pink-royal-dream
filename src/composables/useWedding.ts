@@ -2,6 +2,7 @@ import { ref, computed, onMounted } from 'vue'
 
 
 import { resolveSlug, getHome, submitUcapan, DESIGN_MODE } from '../lib/api'
+import type { PhotoTransform } from '../lib/bandLayer'
 
 const state = ref<{
   loading: boolean
@@ -196,6 +197,24 @@ if (typeof window !== 'undefined') {
  * its design fallback mid-session.
  */
 const designWishes = ref<any[]>([])
+
+/*
+ * Admin "Pengaturan Zoom & Posisi Foto Mempelai (Dinamis)": theme_override.foto_wanita_
+ * transform / foto_pria_transform, { scale, x, y } with x/y in %. As in envelope-red.
+ * Null when the admin never set one, so the photo keeps its own framing.
+ */
+function photoTransform(override: any, key: string): PhotoTransform | null {
+  if (typeof override === 'string') {
+    try { override = JSON.parse(override) } catch { override = {} }
+  }
+  const t = override?.[key]
+  if (!t || typeof t !== 'object') return null
+  const num = (v: unknown, fallback: number) => {
+    const n = typeof v === 'number' ? v : parseFloat(v as string)
+    return Number.isFinite(n) ? n : fallback
+  }
+  return { scale: num(t.scale, 1), x: num(t.x, 50), y: num(t.y, 50) }
+}
 
 export function useWedding() {
   onMounted(() => {
@@ -456,6 +475,8 @@ export function useWedding() {
         y: typeof t?.y === 'number' ? t.y : (parseFloat(t?.y) || 50),
       }
     }),
+    brideTransform: computed(() => photoTransform(wedding.value?.theme_override, 'foto_wanita_transform')),
+    groomTransform: computed(() => photoTransform(wedding.value?.theme_override, 'foto_pria_transform')),
     spousePhotoTransform: computed(() => {
       let ov = wedding.value?.theme_override
       if (typeof ov === 'string') {

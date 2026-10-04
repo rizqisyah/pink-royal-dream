@@ -18,8 +18,8 @@ base's, scaled by `596 / 375` so they move the same distance on screen.
 
 ## Running it
 
-The theme is **TemaPinkRoyalDream**: built under `/TemaPinkRoyalDream/`, deployed by
-`.github/workflows/deploy.yml` to `/var/www/qinvi/themes/TemaPinkRoyalDream/`, with
+The theme is **TemaPinkroyaldream**: built under `/TemaPinkroyaldream/`, deployed by
+`.github/workflows/deploy.yml` to `/var/www/qinvi/themes/TemaPinkroyaldream/`, with
 `tema-pink-royal-dream` as the default slug — the same pattern as `TemaEnvelopRed` /
 `tema-envelop-red`.
 
@@ -27,7 +27,7 @@ The theme is **TemaPinkRoyalDream**: built under `/TemaPinkRoyalDream/`, deploye
 |-----|--------|
 | `VITE_DESIGN_MODE=1` | Show Frame 263's own content (Mario & Amanda) and never call the API. **Do not put it in `.env`**: a local `npm run build` bakes it in, and then nothing is connected — not even in the admin's Mode Imajinasi, whose `refetch` is the only way `pengantin` arrives (its `postMessage` carries the wedding row, not the people). It shipped in `.env` once and the couple's names never connected. Without it, a slug the server lacks (404) already falls back to the design's content. |
 | `VITE_DEFAULT_SLUG` | The wedding a URL with no slug renders. Unset falls back to `tema-pink-royal-dream`. |
-| `VITE_BASE_PATH` | Overrides the `/TemaPinkRoyalDream/` base. `api.ts` reads the base so neither the folder nor its kebab form (`tema-pink-royal-dream` in the path) is ever taken for a slug. |
+| `VITE_BASE_PATH` | Overrides the `/TemaPinkroyaldream/` base. `api.ts` reads the base so neither the folder nor its kebab form (`tema-pinkroyaldream` in the path) is ever taken for a slug. The base is case-sensitive: the wedding's `theme_code` in the admin must be `TemaPinkroyaldream` too, since the admin frames `/<theme_code>/<slug>`. |
 | `VITE_API_PROXY_TARGET` | Where the dev server's `/api` goes. **`.env` sets `http://localhost:3000`, as the base does** — the local admin dashboard (`admin-dashboard/src/utils/api.ts`) writes to that backend and frames this theme at `localhost:5174`, so Mode Imajinasi must read the same backend. Pointed at api.qinvi.id, a wedding made in the local admin 404s there and the couple's names came up blank. Restart `npm run dev` after changing it — Vite reads it at start-up. |
 | `VITE_API_BASE_URL` | As in the base. |
 
@@ -127,6 +127,18 @@ A panel that does not overflow cannot be scrolled, so short wishes are topped up
 the window is full. That fill must wait for the panel to have a box: behind the cover the
 sheet is `display: none`, every height reads 0, and an unguarded fill loaded the whole
 list at mount. A ResizeObserver refills when the cover opens.
+
+## Couple photos: zoom & position
+
+The admin's "Pengaturan Zoom & Posisi Foto Mempelai (Dinamis)" saves
+`theme_override.foto_wanita_transform` / `foto_pria_transform` = `{ scale, x, y }`.
+Implemented as envelope-red does (commit 7f89573 there): `useWedding` exposes
+`brideTransform` / `groomTransform` (null when never set), `BandLayer.zoom` carries it,
+and `BandArt` draws a zoomed layer as a clipping box with the photo inside — cover-fit,
+`object-position: x% y%`, `transform-origin: x% y%`, `scale(scale)` — so the box and
+everything around it stay put while the photo moves. Applies only to a photo from the API
+(the design's own portraits keep their crop), updates live from Mode Imajinasi, and
+follows the **person**, not the slot: with the bride first, her transform goes with her.
 
 ## Spouse photo (footer mirror)
 

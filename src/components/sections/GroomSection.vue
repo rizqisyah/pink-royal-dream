@@ -11,7 +11,7 @@ import { BAND_HEIGHT, LAYERS } from '../../lib/bands/groom'
 
 const { el, shown } = useReveal(0.15)
 const { parsedOverride } = useWedding()
-const { fullName, nickname, parents, instagram, photo } = usePerson(0)
+const { fullName, nickname, parents, instagram, photo, zoom } = usePerson(0)
 
 // 2748:419 — the portrait inside the floral arch.
 const PORTRAIT = '2748:419'
@@ -19,7 +19,16 @@ const PORTRAIT = '2748:419'
 const layers = computed(() =>
   photo.value
     ? LAYERS.map((l) =>
-        l.id === PORTRAIT ? { ...l, src: photo.value, crop: undefined, objectPosition: 'center top' } : l,
+        l.id === PORTRAIT
+          ? {
+              ...l,
+              src: photo.value,
+              crop: undefined,
+              objectPosition: 'center top',
+              // Admin "Zoom & Posisi Foto Mempelai" for whoever this slot shows.
+              zoom: zoom.value ?? undefined,
+            }
+          : l,
       )
     : LAYERS,
 )

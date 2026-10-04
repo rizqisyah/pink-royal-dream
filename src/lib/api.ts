@@ -5,8 +5,8 @@ export const DESIGN_MODE =
   import.meta.env.VITE_DESIGN_MODE === '1' || import.meta.env.VITE_DESIGN_MODE === 'true'
 
 /*
- * The theme's own folder on the VPS (/TemaPinkRoyalDream) is part of every URL, so it
- * is never the slug — and neither is its kebab form (/tema-pink-royal-dream), which the
+ * The theme's own folder on the VPS (/TemaPinkroyaldream) is part of every URL, so it
+ * is never the slug — and neither is its kebab form (/tema-pinkroyaldream), which the
  * base treats the same way. Read from Vite's BASE_URL rather than hardcoding the name,
  * so renaming the deploy folder needs no code change here.
  */

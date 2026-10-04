@@ -47,4 +47,12 @@ export type BandLayer = {
   maskBox?: { src: string; x: number; y: number; w: number; h: number }
   /** CSS `filter`, e.g. a drop-shadow glow. */
   filter?: string
+  /**
+   * Admin-set zoom & focus for a photo (theme_override.foto_*_transform), x/y in %, as in
+   * envelope-red: cover-fit, positioned at x% y%, scaled about that point — inside the
+   * sprite box, so the box (and any mask on it) stays put while the photo moves.
+   */
+  zoom?: PhotoTransform
 }
+
+export type PhotoTransform = { scale: number; x: number; y: number }

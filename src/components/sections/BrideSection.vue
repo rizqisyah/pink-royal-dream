@@ -9,7 +9,7 @@ import { usePerson } from '../../composables/usePerson'
 import { BAND_HEIGHT, LAYERS } from '../../lib/bands/bride'
 
 const { el, shown } = useReveal(0.15)
-const { fullName, nickname, parents, instagram, photo } = usePerson(1)
+const { fullName, nickname, parents, instagram, photo, zoom } = usePerson(1)
 
 // 2750:451 — the portrait inside the floral arch.
 const PORTRAIT = '2750:451'
@@ -17,7 +17,16 @@ const PORTRAIT = '2750:451'
 const layers = computed(() =>
   photo.value
     ? LAYERS.map((l) =>
-        l.id === PORTRAIT ? { ...l, src: photo.value, crop: undefined, objectPosition: 'center top' } : l,
+        l.id === PORTRAIT
+          ? {
+              ...l,
+              src: photo.value,
+              crop: undefined,
+              objectPosition: 'center top',
+              // Admin "Zoom & Posisi Foto Mempelai" for whoever this slot shows.
+              zoom: zoom.value ?? undefined,
+            }
+          : l,
       )
     : LAYERS,
 )
