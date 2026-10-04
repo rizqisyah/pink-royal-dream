@@ -5,9 +5,9 @@ export const DESIGN_MODE =
   import.meta.env.VITE_DESIGN_MODE === '1' || import.meta.env.VITE_DESIGN_MODE === 'true'
 
 /*
- * The theme's own folder on the VPS (/TemaPinkroyaldream) is part of every URL, so it
- * is never the slug — and neither is its kebab form (/tema-pinkroyaldream), which the
- * base treats the same way. Read from Vite's BASE_URL rather than hardcoding the name,
+ * The theme's own folder on the VPS (/Temapinkroyaldream) is part of every URL, so it
+ * is never the slug — in any letter case, and neither is its kebab form, which the base
+ * treats the same way (for a name with inner capitals, e.g. TemaEnvelopRed). Read from Vite's BASE_URL rather than hardcoding the name,
  * so renaming the deploy folder needs no code change here.
  */
 const kebab = (s: string) => s.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase()

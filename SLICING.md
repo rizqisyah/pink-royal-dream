@@ -18,8 +18,8 @@ base's, scaled by `596 / 375` so they move the same distance on screen.
 
 ## Running it
 
-The theme is **TemaPinkroyaldream**: built under `/TemaPinkroyaldream/`, deployed by
-`.github/workflows/deploy.yml` to `/var/www/qinvi/themes/TemaPinkroyaldream/`, with
+The theme is **Temapinkroyaldream**: built under `/Temapinkroyaldream/`, deployed by
+`.github/workflows/deploy.yml` to `/var/www/qinvi/themes/Temapinkroyaldream/`, with
 `tema-pink-royal-dream` as the default slug — the same pattern as `TemaEnvelopRed` /
 `tema-envelop-red`.
 
@@ -27,7 +27,7 @@ The theme is **TemaPinkroyaldream**: built under `/TemaPinkroyaldream/`, deploye
 |-----|--------|
 | `VITE_DESIGN_MODE=1` | Show Frame 263's own content (Mario & Amanda) and never call the API. **Do not put it in `.env`**: a local `npm run build` bakes it in, and then nothing is connected — not even in the admin's Mode Imajinasi, whose `refetch` is the only way `pengantin` arrives (its `postMessage` carries the wedding row, not the people). It shipped in `.env` once and the couple's names never connected. Without it, a slug the server lacks (404) already falls back to the design's content. |
 | `VITE_DEFAULT_SLUG` | The wedding a URL with no slug renders. Unset falls back to `tema-pink-royal-dream`. |
-| `VITE_BASE_PATH` | Overrides the `/TemaPinkroyaldream/` base. `api.ts` reads the base so neither the folder nor its kebab form (`tema-pinkroyaldream` in the path) is ever taken for a slug. The base is case-sensitive: the wedding's `theme_code` in the admin must be `TemaPinkroyaldream` too, since the admin frames `/<theme_code>/<slug>`. |
+| `VITE_BASE_PATH` | Overrides the `/Temapinkroyaldream/` base. `api.ts` reads the base so the folder name (in any letter case) is never taken for a slug. The base is case-sensitive: the wedding's `theme_code` in the admin must be `Temapinkroyaldream` too, since the admin frames `/<theme_code>/<slug>`. |
 | `VITE_API_PROXY_TARGET` | Where the dev server's `/api` goes. **`.env` sets `http://localhost:3000`, as the base does** — the local admin dashboard (`admin-dashboard/src/utils/api.ts`) writes to that backend and frames this theme at `localhost:5174`, so Mode Imajinasi must read the same backend. Pointed at api.qinvi.id, a wedding made in the local admin 404s there and the couple's names came up blank. Restart `npm run dev` after changing it — Vite reads it at start-up. |
 | `VITE_API_BASE_URL` | As in the base. |
 

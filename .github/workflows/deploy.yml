@@ -1,4 +1,4 @@
-name: Deploy Frontend (TemaPinkroyaldream) to VPS
+name: Deploy Frontend (Temapinkroyaldream) to VPS
 
 on:
   push:
@@ -37,4 +37,4 @@ jobs:
 
       - name: Deploy Static Dist to VPS via Rsync
         run: |
-          rsync -avz --delete dist/ ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/var/www/qinvi/themes/TemaPinkroyaldream/
+          rsync -avz --delete dist/ ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/var/www/qinvi/themes/Temapinkroyaldream/

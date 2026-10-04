@@ -15,7 +15,7 @@ export default defineConfig(({ mode }) => {
     // Absolute, not './': slug routes like /demo-envelop are rewritten to index.html,
     // and a relative base would resolve assets against the slug path instead of the root.
     // The theme's folder on the VPS; VITE_BASE_PATH overrides it (e.g. '/' locally).
-    base: env.VITE_BASE_PATH || '/TemaPinkroyaldream/',
+    base: env.VITE_BASE_PATH || '/Temapinkroyaldream/',
     server: {
       port: 5174,
       proxy: {
