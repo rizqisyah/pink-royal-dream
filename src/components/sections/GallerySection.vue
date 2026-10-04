@@ -20,12 +20,16 @@ const navArrow = assets['gallery/parts/nav-arrow.svg']
  * The design fills all five slots with one photo (_DSC4292). Design mode ships no API
  * gallery, so that photo stands in and the same code path runs either way.
  */
-const DESIGN_PHOTO = { src: assets['gallery/parts/gallery-1.webp'], caption: '', design: true }
+const DESIGN_PHOTO = { src: assets['gallery/parts/gallery-1.webp'], design: true }
 const DESIGN_PHOTOS = [DESIGN_PHOTO, DESIGN_PHOTO, DESIGN_PHOTO, DESIGN_PHOTO]
 
 const photos = computed(() => {
   const live = (gallery.value as any[])
-    .map((g) => ({ src: g.image_url as string, caption: (g.caption as string) || '', design: false }))
+    /*
+     * `caption` is not read: the admin fills it with the uploaded file's name
+     * ("Screenshot 2026 09 30 at 15.27.48"), which must never reach a guest.
+     */
+    .map((g) => ({ src: g.image_url as string, design: false }))
     .filter((p) => p.src)
   if (live.length) return live
   // The design's photo stands in only before any wedding is loaded; a real wedding with
@@ -143,7 +147,7 @@ const dlg = ref<HTMLDialogElement | null>(null)
         <img
           :key="active"
           :src="photos[active].src"
-          :alt="photos[active].caption || 'Foto mempelai'"
+          :alt="`Foto galeri ${active + 1}`"
           :class="{ 'is-design': photos[active].design }"
           loading="lazy"
           decoding="async"
@@ -187,11 +191,10 @@ const dlg = ref<HTMLDialogElement | null>(null)
       <img
         class="preview__img"
         :src="photos[active].src"
-        :alt="photos[active].caption || 'Foto mempelai'"
+        :alt="`Foto galeri ${active + 1}`"
         @touchstart.passive="onStart"
         @touchend.passive="onEnd"
       />
-      <p v-if="photos[active].caption" class="preview__caption">{{ photos[active].caption }}</p>
       <button
         v-if="photos.length > 1"
         type="button"
@@ -421,13 +424,6 @@ const dlg = ref<HTMLDialogElement | null>(null)
   border-radius: 8px;
 }
 
-.preview__caption {
-  max-width: 100%;
-  font-family: var(--font-field);
-  font-size: 0.95rem;
-  text-align: center;
-  color: #f7ecec;
-}
 
 .preview__nav {
   position: absolute;
